@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2016-07-16T08:29:52.497Z</updated>
+  <updated>2016-07-16T12:36:13.076Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -16,11 +16,11 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>Hello Hexo</title>
+    <title>第一篇博客</title>
     <link href="http://yoursite.com/2016/07/16/%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/"/>
     <id>http://yoursite.com/2016/07/16/第一篇博客/</id>
     <published>2016-07-16T06:53:38.000Z</published>
-    <updated>2016-07-16T08:29:52.497Z</updated>
+    <updated>2016-07-16T12:36:13.076Z</updated>
     
     <content type="html"></content>
     
@@ -28,6 +28,8 @@
     
     </summary>
     
+    
+      <category term="测试" scheme="http://yoursite.com/tags/%E6%B5%8B%E8%AF%95/"/>
     
   </entry>
   
