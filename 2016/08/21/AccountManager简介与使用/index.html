@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>AccountManager简介与使用 | Lisao的博客 | 丶Lisao</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  
+  <meta name="theme-color" content="#3F51B5">
+  
+  
+  <meta name="keywords" content="Android">
+  <meta name="description" content="&amp;emsp;&amp;emsp;关于账号存储的处理，每个不同的APP都有着不同的处理方式。最为常见的就是使用数据库作为账号管理。使用本地SQLite存储账号的用户名，头像，Token等关于账号的一系列信息。但是，因为数据存储在本地，或许有心术不正的人获取到本地存储的数据库信息(当然了，本地存储的数据库是很容易拿到的)，就能够拿到账号的所有信息。信息就这样泄漏了。&amp;emsp;&amp;emsp;另外一种比较安全的方">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AccountManager简介与使用">
+<meta property="og:url" content="http://mlisao.github.io/2016/08/21/AccountManager简介与使用/index.html">
+<meta property="og:site_name" content="Lisao的博客">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;关于账号存储的处理，每个不同的APP都有着不同的处理方式。最为常见的就是使用数据库作为账号管理。使用本地SQLite存储账号的用户名，头像，Token等关于账号的一系列信息。但是，因为数据存储在本地，或许有心术不正的人获取到本地存储的数据库信息(当然了，本地存储的数据库是很容易拿到的)，就能够拿到账号的所有信息。信息就这样泄漏了。&amp;emsp;&amp;emsp;另外一种比较安全的方">
+<meta property="og:image" content="http://kohoh1992.github.io/image/201407250905.png">
+<meta property="og:image" content="http://kohoh1992.github.io/image/201407250835.png">
+<meta property="og:updated_time" content="2016-08-21T16:10:24.220Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AccountManager简介与使用">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;关于账号存储的处理，每个不同的APP都有着不同的处理方式。最为常见的就是使用数据库作为账号管理。使用本地SQLite存储账号的用户名，头像，Token等关于账号的一系列信息。但是，因为数据存储在本地，或许有心术不正的人获取到本地存储的数据库信息(当然了，本地存储的数据库是很容易拿到的)，就能够拿到账号的所有信息。信息就这样泄漏了。&amp;emsp;&amp;emsp;另外一种比较安全的方">
+<meta name="twitter:image" content="http://kohoh1992.github.io/image/201407250905.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Lisao的博客" type="application/atom+xml">
+  
+  <meta name="summary" content="&lt;p&gt;&amp;emsp;&amp;emsp;关于账号存储的处理，每个不同的APP都有着不同的处理方式。最为常见的就是使用数据库作为账号管理。使用本地SQLite存储账号的用户名，头像，Token等关于账号的一系列信息。但是，因为数据存储在本地，或许有心术不正的人获取到本地存储的数据库信息(当然了，本地存储的数据库是很容易拿到的)，就能够拿到账号的所有信息。信息就这样泄漏了。&lt;br/&gt;&lt;br&gt;&amp;emsp;&amp;emsp;另外一种比较安全的方法就是使用Android系统提供的AccountManager存储账号相关信息。So,google一下发现，国内似乎好像很少有关于这个类的介绍，只查到了一篇翻译国外的一篇文章。所有我想把AccountManager的介绍以及如何使用AccountManager,还有使用过程中需要注意的地方。&lt;br/&gt;&lt;br&gt;">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="loading" class="active"></div>
+
+  <nav id="menu" class="hide" >
+   <div class="inner flex-row-vertical">
+  <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+      <i class="icon icon-lg icon-close"></i>
+  </a>
+  <div class="brand-wrap">
+    <div class="brand">
+      <a href="/" class="avatar"><img src="/img/avatar.jpg"></a>
+      <hgroup class="introduce">
+        <h5 class="nickname">Lisao</h5>
+        <a href="mailto:undefined" title="495797421@qq.com" class="mail">495797421@qq.com</a>
+      </hgroup>
+    </div>
+  </div>
+  <ul class="nav flex-col">
+    
+        <li class="waves-block waves-effect">
+          <a href="/"  >
+            <i class="icon icon-lg icon-home"></i>
+            主页
+          </a>
+        </li>
+    
+        <li class="waves-block waves-effect">
+          <a href="/archives"  >
+            <i class="icon icon-lg icon-archives"></i>
+            文章
+          </a>
+        </li>
+    
+        <li class="waves-block waves-effect">
+          <a href="/tags"  >
+            <i class="icon icon-lg icon-tags"></i>
+            标签
+          </a>
+        </li>
+    
+        <li class="waves-block waves-effect">
+          <a href="https://github.com/mLisao" target="_blank" >
+            <i class="icon icon-lg icon-github"></i>
+            Github
+          </a>
+        </li>
+    
+  </ul>
+
+  <footer class="footer">
+  <p><a rel="license" target="_blank" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0;vertical-align:middle;" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAAAPCAMAAABEF7i9AAAAllBMVEUAAAD///+rsapERER3d3eIiIjMzMzu7u4iIiKUmZO6v7rKzsoODg4RERFVVVUNDQ0NDg0PEA8zMzNLTEtbXltmZmZydnF9gn2AgICPkI+ZmZmqqqq7u7vFxsXIzMgNDQwZGRkgICAhISEkJSMnKCcuMC4xMzE5Ozk7PTtBQkFCQkJDQ0Nna2eGhoaHh4ezuLLGysbd3d1wVGpAAAAA4UlEQVR42q2T1xqCMAyFk7QsBQeKA9x7j/d/OSm22CpX0nzcpA1/T05aAOuBVkMAScQFHLnEwoCo2f1TnQIGoVMewjZEjVFN4GH1Ue1Cn2jWqwfsOOj6wDwGvotsl/c8lv7KIq1eLOsT0HMFHMIE/RZyHnlphryT9zyV+8WH5e8yQw3wnQvgAFxPTKUVi555SHR/lOfLMgVTeDlSfN+TaoUsiTyeIm+bCkHvCA2FUKG48LDtYBZBknsYP/G8NTw0gaaHyuQf4H5pecrB/FYCT2sL9zAfy1Xyjou6L8X2W7YcLyBZCRtnq/zfAAAAAElFTkSuQmCC" /></a></p>
+  <p>Lisao的博客 &copy; 2016</p>
+  <p>Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme
+  <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a></p>
+  <a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-2x icon-rss-square"></i></a>
+</footer>
+
+</div>
+
+  </nav>
+  <main id="main">
+    <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">AccountManager简介与使用</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input " autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-share">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header">
+  <div class="container">
+    <h1 class="author">AccountManager简介与使用</h1>
+    <h5 class="subtitle">
+        
+            <time datetime="2016-08-21T06:11:44.000Z" itemprop="datePublished" class="page-time">
+  2016-08-21
+</time>
+
+
+        
+    </h5>
+  </div>
+</header>
+
+    <div class="container body-wrap">
+      <article id="post-AccountManager简介与使用" 
+  class="article article-type-post" itemprop="blogPost">
+    <div class="post-meat flex-row">
+        
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+
+    </div>
+    <div class="post-body">
+        <aside class="post-widget" id="post-widget">
+
+            
+            <div class="post-share" id="post-share">
+    <div class="tit">分享到：</div>
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" href="javascript:;" data-title="微博" data-service="tsina">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns" href="javascript:;" data-title="微信" data-service="weixin">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" href="javascript:;" data-title=" QQ" data-service="cqq">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" href="javascript:;" data-title=" Facebook" data-service="fb">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" href="javascript:;" data-title=" Twitter" data-service="twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="douban share-sns" href="javascript:;" data-title="豆瓣" data-service="douban">
+          豆
+        </a>
+      </li>
+    </ul>
+ </div>
+
+            
+
+            
+            <nav class="post-toc-wrap" id="post-toc">
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#1-Accout介绍"><span class="post-toc-text">1.Accout介绍</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#2-AccountManager介绍"><span class="post-toc-text">2.AccountManager介绍</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#3-添加一个账户信息"><span class="post-toc-text">3.添加一个账户信息</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#4-删除一个账户"><span class="post-toc-text">4.删除一个账户</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#5-获取用户token信息及用户数据"><span class="post-toc-text">5.获取用户token信息及用户数据</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#6-更改用户信息"><span class="post-toc-text">6.更改用户信息</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#7-总结需要注意的几点。"><span class="post-toc-text">7.总结需要注意的几点。</span></a></li></ol>
+            </nav>
+            
+        </aside>
+
+        <div class="post-main">
+
+            <div class="post-content" id="post-content" itemprop="postContent">
+            <p>&emsp;&emsp;关于账号存储的处理，每个不同的APP都有着不同的处理方式。最为常见的就是使用数据库作为账号管理。使用本地SQLite存储账号的用户名，头像，Token等关于账号的一系列信息。但是，因为数据存储在本地，或许有心术不正的人获取到本地存储的数据库信息(当然了，本地存储的数据库是很容易拿到的)，就能够拿到账号的所有信息。信息就这样泄漏了。<br><br>&emsp;&emsp;另外一种比较安全的方法就是使用Android系统提供的AccountManager存储账号相关信息。So,google一下发现，国内似乎好像很少有关于这个类的介绍，只查到了一篇翻译国外的一篇文章。所有我想把AccountManager的介绍以及如何使用AccountManager,还有使用过程中需要注意的地方。<br><br><a id="more"></a><br>附：<a href="http://kohoh1992.github.io/AndroidAccountsGuide" target="_blank" rel="external">(翻译) Android Accounts Api使用指南</a><br><br>下边就先介绍一下相关的类  </p>
+<h4 id="1-Accout介绍"><a href="#1-Accout介绍" class="headerlink" title="1.Accout介绍"></a>1.Accout介绍</h4><p>Accont其实就是我们需要添加的账号，里边只有两个字段。<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">final</span> String name;</div><div class="line"><span class="keyword">public</span> <span class="keyword">final</span> String type;</div></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;其中name表示该账户的用户名，当然了，有很多应用它的用户名是隐藏的，你也可以把它作为昵称来看待。type则代表账户的类型，这个是type必须是独一无二的，当然了，如果说你的两个应用使用的是同一个账户管理体系，这个是可以相同的。<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">Account</span><span class="params">(String name, String type)</span> </span>&#123;</div><div class="line">    <span class="keyword">if</span> (TextUtils.isEmpty(name)) &#123;</div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"the name must not be empty: "</span> + name);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (TextUtils.isEmpty(type)) &#123;</div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"the type must not be empty: "</span> + type);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">this</span>.name = name;</div><div class="line">    <span class="keyword">this</span>.type = type;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;通过传递name和type完成对Account的创建。这个时候可能会疑问，不是说好的存储呢token呢，还有头像的信息，还有其他一些数据呢？其实，本身Account的本身是不存储这样的东西的，如果想存储关于账号的其他数据，需要通过<code>AccountManager.addAccountExplicitly(account, password, userData)</code>的方式来添加用户的附加信息的。其中userData是一个Bundle类型的数据，通过<code>bundle.put(key,object)</code>的方式添加用户所需要的附加数据。关于AccountManager的介绍及常用方法，接下来会详细讲解。</p>
+<h4 id="2-AccountManager介绍"><a href="#2-AccountManager介绍" class="headerlink" title="2.AccountManager介绍"></a>2.AccountManager介绍</h4><p>关于AccountManager类，Android官方的开发文档是这么介绍的</p>
+<blockquote>
+<p>This class provides access to a centralized registry of the user’s online accounts. The user enters credentials (username and password) once per account, granting applications access to online resources with “one-click” approval.</p>
+</blockquote>
+<p>简单的来翻译一下吧<br><br>&emsp;&emsp;这个类提供了访问用户的网上帐户的统一的管理。每个用户只需要要输入一次凭据（用户名和密码），一键式的授予应用程序访问网络资源。（英语不好，如有错误，请指正）。<br><br>通俗的来说，可以使用这个类来完成对账号的增、删、改、查。<br></p>
+<h4 id="3-添加一个账户信息"><a href="#3-添加一个账户信息" class="headerlink" title="3.添加一个账户信息"></a>3.添加一个账户信息</h4><p>&emsp;&emsp;刚才上文中也已经提到了，就是使用<code>AccountManager.addAccountExplicitly(account, password, userData)</code>的方式进行添加的。看一下这个方法的源码。<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">private</span> <span class="keyword">final</span> IAccountManager mService;</div><div class="line"><span class="comment">//省略中间部分代码</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">addAccountExplicitly</span><span class="params">(Account account, String password, Bundle userdata)</span> </span>&#123;</div><div class="line">     <span class="keyword">if</span> (account == <span class="keyword">null</span>) <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"account is null"</span>);</div><div class="line">     <span class="keyword">try</span> &#123;</div><div class="line">         <span class="keyword">return</span> mService.addAccountExplicitly(account, password, userdata);</div><div class="line">     &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</div><div class="line">         <span class="comment">// Can happen if there was a SecurityException was thrown.</span></div><div class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(e);</div><div class="line">     &#125;</div><div class="line"> &#125;</div></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;其中<code>IAccountManager</code>是一个aidl接口类，不难猜测出其中的具体添加账户的服务由Android系统底层服务添加，很抱歉，我在翻阅了大量的资料后，并没有找到相关的源码。不过，通过这样一个方法就可以添加一个账户进入系统的账户。<br></p>
+<h4 id="4-删除一个账户"><a href="#4-删除一个账户" class="headerlink" title="4.删除一个账户"></a>4.删除一个账户</h4><p>&emsp;&emsp;删除账户有对应的方法在API21前后略有不同，在API21以前采用的是<code>removeAccount(Account account, AccountManagerCallback&lt;Boolean&gt; callback, Handler handler)</code>，而在API21之后则改成了<code>removeAccount(Account account, Activity activity, AccountManagerCallback&lt;Bundle&gt; callback, Handler handler)</code>，另外还有一个方法是<code>removeAccountExplicitly(Account account)</code><br>&emsp;&emsp;其中前两个是异步方式进行的，最后一个方法看官网的方法描述<code>Removes an account directly.（直接删除账户）</code>(目前我使用的是API22以前异步的方法，其他的两个方法暂时未进行测试，欢迎各路大神测试吐槽)。<br><br>关于三个参数介绍:</p>
+<ul>
+<li><code>Account</code>:表示带移除的账户，看源码之后发现，当account传入<code>null</code>的时候，会抛出一个异常，所以要确保出传入的account不能为null</li>
+<li><code>AccountManagerCallback&lt;Boolean&gt;</code>:表示移除完成后的回调，通过<code>future.getResult()</code>获取回调的返回结果</li>
+<li><code>Handler</code>:对应回调的线程，当然了，如果你传入为<code>null</code>的话，他的默认回调线程则是为主线程<br>对于这个方法，我是这样使用的。<figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">removeCurrentAccount</span><span class="params">()</span> </span>&#123;</div><div class="line">  Account account = getCurrentAccount();</div><div class="line">  <span class="keyword">if</span> (account == <span class="keyword">null</span>)</div><div class="line">      <span class="keyword">return</span>;</div><div class="line">  manager.removeAccount(account, <span class="keyword">new</span> AccountManagerCallback&lt;Boolean&gt;() &#123;</div><div class="line">      <span class="meta">@Override</span></div><div class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">(AccountManagerFuture&lt;Boolean&gt; future)</span> </span>&#123;</div><div class="line">          <span class="keyword">try</span> &#123;</div><div class="line">              Logger.i(<span class="string">"移除账号"</span> + future.getResult());</div><div class="line">              <span class="comment">//send EventBus or BroaderCast or RxBus</span></div><div class="line">              RxBus.getDefault().send(<span class="keyword">new</span> AccountSignStatus(<span class="keyword">false</span>));</div><div class="line">          &#125; <span class="keyword">catch</span> (OperationCanceledException e) &#123;</div><div class="line">              e.printStackTrace();</div><div class="line">          &#125; <span class="keyword">catch</span> (AuthenticatorException e) &#123;</div><div class="line">              e.printStackTrace();</div><div class="line">          &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">              e.printStackTrace();</div><div class="line">          &#125;</div><div class="line">      &#125;</div><div class="line">  &#125;, <span class="keyword">null</span>);</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>&emsp;&emsp;以上两个是比较基础的添加和删除账号信息，剩下的获取账号信息的部分还有修改账号用户名（昵称）我将会用超长的篇幅类介绍和使用关于这些方法的相信使用，因为这些方法是相对来说调用比较频繁的，特别是获取账户信息的方法，同时，在使用这些方法时，我遇到的坑还是相当多的。而同时，在获取账号token也是整个账户管理的核心，同时也是最复杂的。  </p>
+<h4 id="5-获取用户token信息及用户数据"><a href="#5-获取用户token信息及用户数据" class="headerlink" title="5.获取用户token信息及用户数据"></a>5.获取用户token信息及用户数据</h4><p>先简单介绍一下获取token的流程,下面是关于获取账户token的流程示意图<br><img src="http://kohoh1992.github.io/image/201407250905.png" alt=""></p>
+<p>这看起来似乎是一团乱麻，但是其实相当的简单。我会解释一下当我们第一次在设备上用一个账号登入时出现的情况。</p>
+<p><strong>第一次登陆</strong></p>
+<ol>
+<li>app向AccountManager请求一个AuthToken。</li>
+<li>AccountManager询问相关的AccountAuthenticiator是否有缓存的AuthToken。</li>
+<li>因为没有缓存的AuthToken（还没有登入），AccountManager为我们开启一个AccountAuthenticatorActivity，引导用户登入。</li>
+<li>用户成功登陆，AuthToken从服务端返回。</li>
+<li>Accountmanager将AuthToken缓存起来以便于将来使用。</li>
+<li>app获得她请求的AuthToken.</li>
+<li>众人皆喜！</li>
+</ol>
+<p>如果用户已经登入，那么我们就会在第二步时获得AuthToken。(摘抄<a href="http://kohoh1992.github.io/AndroidAccountsGuide" target="_blank" rel="external">(翻译) Android Accounts Api使用指南</a>原文)<br>看起来是很复杂的事情，不过我会一步一步来解释并实现这样的一个过程。</p>
+<p>####第一步 创建属于自己的账号服务<br>首先我需要编写出一个<code>Authenticator</code>认证器的类，让这个类继承<code>AbstractAccountAuthenticator</code>,并实现其中的方法。具体的实现会在接下来进行介绍。<br>然后创建一个服务类，并在mainifist如下代码所示<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * Created by lisao on 2016/3/19.</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AccountService</span> <span class="keyword">extends</span> <span class="title">Service</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> Authenticator authenticator;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.onCreate();</div><div class="line">        authenticator = <span class="keyword">new</span> Authenticator(<span class="keyword">this</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Nullable</span></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> IBinder <span class="title">onBind</span><span class="params">(Intent intent)</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> authenticator.getIBinder();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>第三步，在res文件夹下创建xml文件夹，并添加<code>authenticator.xml</code>文件<br><figure class="highlight xml"><table><tr><td class="code"><pre><div class="line">&lt;?xml version="1.0" encoding="utf-8"?&gt;</div><div class="line"><span class="tag">&lt;<span class="name">account-authenticator</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></div><div class="line">    <span class="attr">android:accountType</span>=<span class="string">"定义的唯一账户类型，建议使用公司域名，如果你贵司有多个产品并共享一套数据库的话"</span></div><div class="line">    <span class="attr">android:icon</span>=<span class="string">"@mipmap/ic_launcher"</span></div><div class="line">    <span class="attr">android:label</span>=<span class="string">"@string/app_name"</span></div><div class="line">    <span class="attr">android:smallIcon</span>=<span class="string">"@mipmap/ic_launcher"</span> /&gt;</div></pre></td></tr></table></figure></p>
+<p>最后配置mainifest清单文件中添加<br><figure class="highlight xml"><table><tr><td class="code"><pre><div class="line"><span class="comment">&lt;!--用户认证 service--&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">service</span></span></div><div class="line">    <span class="attr">android:name</span>=<span class="string">".account.AccountService"</span></div><div class="line">    <span class="attr">android:enabled</span>=<span class="string">"true"</span></div><div class="line">    <span class="attr">android:exported</span>=<span class="string">"true"</span>&gt;</div><div class="line">    <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.accounts.AccountAuthenticator"</span> /&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">meta-data</span></span></div><div class="line">        <span class="attr">android:name</span>=<span class="string">"android.accounts.AccountAuthenticator"</span></div><div class="line">        <span class="attr">android:resource</span>=<span class="string">"@xml/authenticator"</span> /&gt;</div><div class="line"><span class="tag">&lt;/<span class="name">service</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>经过以上的几个步骤，运行APP就可以在Android的设置界面点击添加账户看到定义的账号名称了。类似于这样。（补充一点，某系机型可能看不到，例如说某米，某族等）<br><img src="http://kohoh1992.github.io/image/201407250835.png" alt=""><br>OK，上文也提到了，会对实现的<code>Authenticator</code>进行详解。其实我们主要关注的就是其中的两个方法，一个是<code>addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options)</code>,另外一个就是<code>getAuthToken(final AccountAuthenticatorResponse response, final Account account, String authTokenType, Bundle options)</code>第一个是在设置界面点击添加账户是跳转到登录页的方法，另外一个就是使用<code>AccountManager.getAuthToken</code>调用的方法。<br>对于addAccount方法我的实现是这样的<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> Bundle <span class="title">addAccount</span><span class="params">(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options)</span> <span class="keyword">throws</span> NetworkErrorException </span>&#123;</div><div class="line">    <span class="keyword">final</span> Intent intent = <span class="keyword">new</span> Intent(mContext, SignActivity.class);</div><div class="line">    intent.putExtra(SignActivity.ARG_ACCOUNT_TYPE, accountType);</div><div class="line">    intent.putExtra(SignActivity.ARG_AUTH_TYPE, authTokenType);</div><div class="line">    intent.putExtra(SignActivity.ARG_IS_ADDING_NEW_ACCOUNT, <span class="keyword">true</span>);</div><div class="line"></div><div class="line">    intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);</div><div class="line">    <span class="keyword">final</span> Bundle bundle = <span class="keyword">new</span> Bundle();</div><div class="line">    bundle.putParcelable(AccountManager.KEY_INTENT, intent);</div><div class="line">    <span class="keyword">return</span> bundle;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>SignAcitiviy需要继承AccountAuthenticatorActivity，当然了如果你项目中与BaseActivity的时候，你讲AccountAuthenticatorActivity中的相关变量和方法复制到SignAcitiviy也是可以的。 具体的SignAcitivity实现请参考本文头部提到的原文<br>对于getAuthToken我的实现是这样的<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"></div><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> Bundle <span class="title">getAuthToken</span><span class="params">(<span class="keyword">final</span> AccountAuthenticatorResponse response, <span class="keyword">final</span> Account account, String authTokenType, Bundle options)</span> <span class="keyword">throws</span> NetworkErrorException </span>&#123;</div><div class="line"></div><div class="line">    String authToken = AccountUtil.peekAuthToken(account, authTokenType);</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (TextUtils.isEmpty(authToken)) &#123;</div><div class="line">        <span class="keyword">final</span> String password = AccountUtil.getPassword(account);</div><div class="line">        <span class="keyword">if</span> (password != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="comment">//使用账户密码进行登录</span></div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (!TextUtils.isEmpty(authToken)) &#123;</div><div class="line">        <span class="keyword">final</span> Bundle result = <span class="keyword">new</span> Bundle();</div><div class="line">        result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);</div><div class="line">        result.putString(AccountManager.KEY_ACCOUNT_TYPE, account.type);</div><div class="line">        result.putString(AccountManager.KEY_AUTHTOKEN, authToken);</div><div class="line">        <span class="keyword">return</span> result;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">final</span> Intent intent = <span class="keyword">new</span> Intent(mContext, SignActivity.class);</div><div class="line">    intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);</div><div class="line">    <span class="keyword">final</span> Bundle bundle = <span class="keyword">new</span> Bundle();</div><div class="line">    bundle.putParcelable(AccountManager.KEY_INTENT, intent);</div><div class="line">    <span class="keyword">return</span> bundle;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>Ok，经过以上的代码编写，你可以使用<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line">AccountManager.getAuthToken(Account account, String authTokenType, Bundle options, Activity activity, AccountManagerCallback&lt;Bundle&gt; callback, Handler handler)</div></pre></td></tr></table></figure></p>
+<p>和<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line">AccountManager.getAuthTokenByFeatures(String accountType, String authTokenType, String[] features, Activity activity, Bundle addAccountOptions, Bundle getAuthTokenOptions, AccountManagerCallback&lt;Bundle&gt; callback, Handler handler)</div></pre></td></tr></table></figure></p>
+<p>两个方法了(妈蛋!需要传递这么多的参数，到底鬼什么意思?)<br>先来介绍一下<code>getAuthToken</code>这个方法.<br>根据官方文档的解释</p>
+<blockquote>
+<p>&emsp;&emsp;Gets an auth token of the specified type for a particular account, prompting the user for credentials if necessary. This method is intended for applications running in the foreground where it makes sense to ask the user directly for a password.</p>
+<p>&emsp;&emsp;If a previously generated auth token is cached for this account and type, then it is returned. Otherwise, if a saved password is available, it is sent to the server to generate a new auth token. Otherwise, the user is prompted to enter a password.</p>
+</blockquote>
+<p>官方文档的解释也印证了上边提到的当获取<code>AuthToken</code>的流程(如果忘记了，请返回上文仔细观看)。实际上这也是在<code>Authenticator</code>中<code>getAuthToken</code>的流程逻辑。</p>
+<p>最后解释一下传递参数的详细解释</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">参数名称</th>
+<th style="text-align:left">参数释义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">account</td>
+<td style="text-align:left">需指定的账户</td>
+</tr>
+<tr>
+<td style="text-align:left">authTokenType</td>
+<td style="text-align:left">账号token的类别，不是账号的类别并且不可以为null</td>
+</tr>
+<tr>
+<td style="text-align:left">options</td>
+<td style="text-align:left">身份认证专用的请求选项可以为null</td>
+</tr>
+<tr>
+<td style="text-align:left">activity</td>
+<td style="text-align:left">不解释</td>
+</tr>
+<tr>
+<td style="text-align:left">callback</td>
+<td style="text-align:left">调用完成时的回调，如果为null则不回掉</td>
+</tr>
+<tr>
+<td style="text-align:left">handle</td>
+<td style="text-align:left">回调的线程，如果传null则回调为主线程</td>
+</tr>
+</tbody>
+</table>
+<p>接下来介绍一下<code>getAuthTokenByFeatures</code>这个方法。还是先看一下官方文档</p>
+<blockquote>
+<p>This method gets a list of the accounts matching the specified type and feature set; if there is exactly one, it is used; if there are more than one, the user is prompted to pick one; if there are none, the user is prompted to add one. Finally, an auth token is acquired for the chosen account.</p>
+</blockquote>
+<p>翻译一下就是，这个方法会根据传递的账户类型匹配是否有该类型的账户，如果恰好有一个，则返回改账户的token，如果有多个，则弹出一个对话框让你选择一个，如果没有，会让你新建一个指定类型的账户,最后返回这个账户的token。</p>
+<p><strong>其实toke的获取流程还是和<code>getAuthToken</code>的流程相同。唯一的一点区别在于<code>getAuthToken</code>需要传递的是一个已知的账户，而<code>getAuthTokenByFeatures</code>传递的是一个账户类型，由系统帮我们选定账户。</strong><br>最后还是列举一下传递参数的意思</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">参数名称</th>
+<th style="text-align:left">参数释义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">accountType</td>
+<td style="text-align:left">账户类型</td>
+</tr>
+<tr>
+<td style="text-align:left">authTokenType</td>
+<td style="text-align:left">账户token类型</td>
+</tr>
+<tr>
+<td style="text-align:left">features</td>
+<td style="text-align:left">该账户需要授权的功能，可以为null</td>
+</tr>
+<tr>
+<td style="text-align:left">activity</td>
+<td style="text-align:left">不解释</td>
+</tr>
+<tr>
+<td style="text-align:left">addAccountOptions</td>
+<td style="text-align:left">身份认证专用的请求选项可以为null 用于添加账户时使用</td>
+</tr>
+<tr>
+<td style="text-align:left">getAuthTokenOptions</td>
+<td style="text-align:left">身份认证专用的请求选项可以为null 用于获取账户时使用</td>
+</tr>
+<tr>
+<td style="text-align:left">callback</td>
+<td style="text-align:left">调用完成时的回调，如果为null则不回掉</td>
+</tr>
+<tr>
+<td style="text-align:left">handle</td>
+<td style="text-align:left">回调的线程，如果传null则回调为主线程</td>
+</tr>
+</tbody>
+</table>
+<p>上述就是获取账户信息Token的常用方法。下面就来介绍一下获取账户数据的方法，就是像获取用户头像信息等。</p>
+<p>获取用户数据比较上来说就简单多了。直接调用<code>manager.getUserData(Account account, String key)</code>就可以了。这个方法是同步获取的，相比上述获取token的方式简单太多了。参数释义太简单了不再一一赘述。</p>
+<h4 id="6-更改用户信息"><a href="#6-更改用户信息" class="headerlink" title="6.更改用户信息"></a>6.更改用户信息</h4><p>先解释最简单吧，修改用户数据，也就是修改用户的头像信息这些东西了。调用<code>manager.setUserData(Account account, String key，String value);</code>就可以了。具体参数释义不解释了。<br>其实最坑的一点就是修改账号的昵称（用户名）。闲话不多说，先上代码。<br><figure class="highlight java"><table><tr><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">AccountCallBack</span> </span>&#123;</div><div class="line">  <span class="function"><span class="keyword">void</span> <span class="title">done</span><span class="params">()</span></span>;</div><div class="line"></div><div class="line">  <span class="function"><span class="keyword">void</span> <span class="title">error</span><span class="params">(String msg)</span></span>;</div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">renameAccount</span><span class="params">(<span class="keyword">final</span> String newName, <span class="keyword">final</span> AccountCallBack callback)</span> </span>&#123;</div><div class="line">    <span class="keyword">if</span> (TextUtils.isEmpty(getCurrentAccountToken())) <span class="keyword">return</span>;</div><div class="line">    <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.LOLLIPOP) &#123;</div><div class="line">        manager.renameAccount(getCurrentAccount(), newName, <span class="keyword">new</span> AccountManagerCallback&lt;Account&gt;() &#123;</div><div class="line">            <span class="meta">@Override</span></div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">(AccountManagerFuture&lt;Account&gt; future)</span> </span>&#123;</div><div class="line">                <span class="keyword">try</span> &#123;</div><div class="line">                    <span class="keyword">if</span> (future.getResult().name.equals(newName)) &#123;</div><div class="line">                        callback.done();</div><div class="line">                    &#125; <span class="keyword">else</span> &#123;</div><div class="line">                        callback.error(<span class="string">"昵称修改失败,请稍后重试"</span>);</div><div class="line">                    &#125;</div><div class="line">                &#125; <span class="keyword">catch</span> (OperationCanceledException e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                    callback.error(<span class="string">"昵称修改失败,请稍后重试"</span>);</div><div class="line">                &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                    callback.error(<span class="string">"昵称修改失败,请稍后重试"</span>);</div><div class="line">                &#125; <span class="keyword">catch</span> (AuthenticatorException e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                    callback.error(<span class="string">"昵称修改失败,请稍后重试"</span>);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;, <span class="keyword">null</span>);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        String avatar = manager.getUserData(getCurrentAccount(), ACCOUNT_AVATAR);</div><div class="line">        String joinTime = manager.getUserData(getCurrentAccount(), ACCOUNT_JOIN_TIME);</div><div class="line">        String mobile = manager.getUserData(getCurrentAccount(), ACCOUNT_MOBILE);</div><div class="line">        String userId = manager.getUserData(getCurrentAccount(), ACCOUNT_USER_ID);</div><div class="line">        <span class="keyword">final</span> String password = manager.getPassword(getCurrentAccount());</div><div class="line">        <span class="keyword">final</span> String token = getCurrentAccountToken();</div><div class="line">        <span class="keyword">final</span> Bundle bundle = <span class="keyword">new</span> Bundle();</div><div class="line">        bundle.putString(ACCOUNT_AVATAR, avatar);</div><div class="line">        bundle.putString(ACCOUNT_JOIN_TIME, joinTime);</div><div class="line">        bundle.putString(ACCOUNT_MOBILE, mobile);</div><div class="line">        bundle.putString(ACCOUNT_USER_ID, userId);</div><div class="line">        manager.removeAccount(getCurrentAccount(), <span class="keyword">new</span> AccountManagerCallback&lt;Boolean&gt;() &#123;</div><div class="line">            <span class="meta">@Override</span></div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">(AccountManagerFuture&lt;Boolean&gt; future)</span> </span>&#123;</div><div class="line">                <span class="keyword">try</span> &#123;</div><div class="line">                    <span class="keyword">if</span> (future.getResult()) &#123;</div><div class="line">                        addAccountExplicitly(newName, password, bundle);</div><div class="line">                        setAuthToken(getCurrentAccount(), AUTH_TOKEN_TYPE_FULL_ACCESS, token);</div><div class="line">                        callback.done();</div><div class="line">                    &#125; <span class="keyword">else</span> &#123;</div><div class="line">                        callback.error(<span class="string">"昵称修改失败,请稍后重试"</span>);</div><div class="line">                    &#125;</div><div class="line">                &#125; <span class="keyword">catch</span> (OperationCanceledException e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                    callback.error(<span class="string">"昵称修改失败,请稍后重试"</span>);</div><div class="line">                &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                    callback.error(<span class="string">"昵称修改失败,请稍后重试"</span>);</div><div class="line">                &#125; <span class="keyword">catch</span> (AuthenticatorException e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                    callback.error(<span class="string">"昵称修改失败,请稍后重试"</span>);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;, <span class="keyword">null</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>代码的逻辑解释一下，当在API21之后使用<code>manager.renameAccount</code>的方法直接重名昵称（用户名），在API21之前，先把用户数据存储下来，移除账户后添加一个新名字的账户。（目前我是这么做的，希望有更好的方法大神指点）<br>这么做会遇到一个问题，就是当新名字和旧的名字是相同的时候。出现一个奇怪的现象，<strong>重命名成功后，账户列表不显示账户，并且这个账号永久性的添加不成功，只有当卸载APP之后才可以。</strong>所有目前的做法是如果是相同昵称，直接返回重命名成功就好了。</p>
+<h4 id="7-总结需要注意的几点。"><a href="#7-总结需要注意的几点。" class="headerlink" title="7.总结需要注意的几点。"></a>7.总结需要注意的几点。</h4><ol>
+<li>不同的账户体系，accounttype千万不要相同。</li>
+<li>在AccountManager存储token的时候也是以明文进行存储的，保险起见，加一下密。</li>
+<li>注意重命名昵称的时候不要和旧名字相同。</li>
+<li>关于账号数据服务器返回数据的能存的尽量存下来，以备后续版本可能会用到。</li>
+</ol>
+<p>关于这篇介绍AccountManager，因为本人水平有限，在介绍的时候难免会有错误，欢迎各路大神指正。</p>
+<p>Created By Lisao<br>2016-8-22</p>
+
+            <blockquote>
+                <p>
+                本文地址：
+                <a href="http://mlisao.github.io/2016/08/21/AccountManager简介与使用/" target="_blank" rel="external">http://mlisao.github.io/2016/08/21/AccountManager简介与使用/</a>
+                </p>
+                <footer><cite><a href="http://mlisao.github.io">@Lisao的博客</a></cite></footer>
+            </blockquote>
+            </div>
+            
+<nav class="post-nav">
+  
+
+  
+    <div class="waves-block waves-effect next fr">
+      <a href="/2016/07/17/Markdown语法总结/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Markdown语法总结</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+            
+            
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="AccountManager简介与使用" data-title="AccountManager简介与使用" data-url="http://mlisao.github.io/2016/08/21/AccountManager简介与使用/index.html"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"lisao"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+        </div>
+    </div>
+</article>
+    </div>
+  </main>
+<div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+<script>
+var BLOG_SHARE = {
+    title: "AccountManager简介与使用",
+    pic: "/img/avatar.jpg",
+    summary: document.getElementsByName('summary')[0].content,
+    url: "http://mlisao.github.io/2016/08/21/AccountManager简介与使用/index.html"
+};
+</script>
+<div class="global-share" id="global-share">
+    <div class="tit">分享到：</div>
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" href="javascript:;" data-title="微博" data-service="tsina">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns" href="javascript:;" data-title="微信" data-service="weixin">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" href="javascript:;" data-title=" QQ" data-service="cqq">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" href="javascript:;" data-title=" Facebook" data-service="fb">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" href="javascript:;" data-title=" Twitter" data-service="twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="douban share-sns" href="javascript:;" data-title="豆瓣" data-service="douban">
+          豆
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+<script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+
+<script src="/js/main.js"></script>
+
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<script type="text/template" id="search-tpl">
+<li class="item">
+    <a href="/{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</script>
+
+<script src="/js/search.js"></script>
+
+
+
+
+
+
+
+
+
+</body>
+</html>
